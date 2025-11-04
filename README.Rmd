@@ -1,0 +1,93 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# D2SBtools
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of D2SBtools is to provide helpful internal tools for D2SB projects. 
+
+## Installation
+
+You can install the development version of D2SBtools like so:
+
+```{r, eval = FALSE}
+devtools::install_github("petersonR/D2SBtools")
+```
+
+Then load the library: 
+
+```{r}
+library(D2SBtools)
+```
+
+
+## Example
+
+This is a basic example:
+
+```{r, echo = FALSE, include = FALSE}
+library(tidyverse)
+# write a local verson to be able to read
+dir.create("Admin")
+ghost_project <- list(
+  title = "My D2SB Project",
+  analyst = "Me",
+  status = "active",
+  pi = "My PI",
+  data_path_from_sharepoint = "Projects/template_project"
+)
+yaml::write_yaml(ghost_project, file = "Admin/project.yml")
+Sys.setenv("D2SB_SP_PATH" = "~/Library/CloudStorage/OneDrive-SharedLibraries-UniversityofIowa/Data2Science BRIDGE - Documents")
+```
+
+# Get all available project data
+
+```{r example}
+get_project_data()
+```
+
+# Get specific project data 
+
+```{r}
+get_project_data("title")
+
+```
+
+# Get sharepoint path
+
+```{r}
+sp_path()
+
+```
+
+# List files on sharepoint
+
+```{r}
+list.files(sp_path())
+```
+
+# Read data off sharepoint
+
+```{r}
+test_data <- read_csv(sp_path("DataRaw/test_data.csv")) 
+test_data
+```
+
+```{r, echo = FALSE, include = FALSE}
+unlink("Admin", recursive = TRUE)
+```
+

@@ -1,0 +1,17 @@
+Package: D2SBtools
+Type: Package
+Title: Tools for the Data 2 Science BRIDGE at Iowa
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Ryan", "Peterson",
+      email = "ryan-peterson@uiowa.edu",
+      role = c("aut", "cre")
+    )
+  )
+Description: This package is meant to help processes and procedures related to 
+    working at the D2SB. 
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.3
