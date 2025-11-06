@@ -7,7 +7,8 @@
 sp_path(file_name = "")
 }
 \arguments{
-\item{file_name}{optionally returns full file name for a specific file}
+\item{file_name}{optionally returns full file name for a specific file
+automatically should paste together in file.path}
 }
 \value{
 a director or file_name path that will return the proper
