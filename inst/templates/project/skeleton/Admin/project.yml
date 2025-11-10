@@ -1,9 +1,9 @@
 # project.yml — minimal metadata for reports, dashboards & admin
-title: "<Project title>"
+title: "Project title"
 status: "active"                # active | paused | completed
-pi: "<PI name>"
-dept: "<Department or Division>"
-analyst: "<Lead analyst or TBA>"
+pi: "PI name"
+dept: "Department or Division"
+analyst: "Lead analyst or TBA"
 start_date: "<YYYY-MM-DD>"
 expected_end: "<YYYY-MM-DD>"
 data_path_from_sharepoint: "Projects/<path-to-project>"

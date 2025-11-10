@@ -73,7 +73,7 @@ create_project <- function(project_name,
 
   # 6. Optionally open in RStudio
   if (open && rstudioapi::isAvailable()) {
-    rstudioapi::openProject(path)
+    rstudioapi::openProject(path, newSession = TRUE)
   }
 
   message(glue::glue("✅ Created project '{project_name}' at {path}"))

@@ -26,6 +26,6 @@ create_report <- function(path = "Reports/new.qmd",
   template_file <- fs::path(template_root, "report.qmd")
   template_txt <- readLines(template_file)
 
-  writeLines(rendered, path)
+  writeLines(template_txt, path)
   invisible(path)
 }
