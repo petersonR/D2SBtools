@@ -24,23 +24,61 @@ Then load the library:
 library(D2SBtools)
 ```
 
-## Example
+# Example
 
-This is a basic example:
+This is a basic example.
 
-# Get all available project data
+## Create new D2SB project
+
+The following copies the [template project
+directory](https://github.com/petersonR/D2SBtools/tree/main/inst/templates/project/skeleton)
+and thereby creates a new project.
+
+``` r
+# write a local verson to be able to read
+create_project(
+  project_name = "temporary_project", 
+  path = NULL, # creates in current directory
+  open = FALSE, # Opens in RStudio
+  
+  # Set parameters in Admin/project.yml (can be done later too)
+  title = "My D2SB Project",
+  analyst = "Me",
+  status = "active",
+  pi = "My PI",
+  data_path_from_sharepoint = "Projects/template_project"
+)
+#> ✅ Created project 'temporary_project' at /Users/rpterson/Library/CloudStorage/OneDrive-UniversityofIowa/Software/D2SBtools/temporary_project
+```
+
+## Get all available project data
+
+Moving into this temporary project, we can then run the following
+commands
 
 ``` r
 get_project_data()
-#>                       title                     analyst 
-#>           "My D2SB Project"                        "Me" 
-#>                      status                          pi 
-#>                    "active"                     "My PI" 
-#>   data_path_from_sharepoint 
-#> "Projects/template_project"
+#>                         project_name                         date_created 
+#>                  "temporary_project"                         "2025-11-10" 
+#>                                title                              analyst 
+#>                    "My D2SB Project"                                 "Me" 
+#>                               status                                   pi 
+#>                             "active"                              "My PI" 
+#>            data_path_from_sharepoint                                 dept 
+#>          "Projects/template_project"           "<Department or Division>" 
+#>                           start_date                         expected_end 
+#>                       "<YYYY-MM-DD>"                       "<YYYY-MM-DD>" 
+#>                    current_data_date        biostat_effort_planned.person 
+#>                         "YYYY-MM-DD"                             "<name>" 
+#>          biostat_effort_planned.role           biostat_effort_planned.fte 
+#>                            "faculty"                               "0.05" 
+#>         biostat_effort_planned.start           biostat_effort_planned.end 
+#>                       "<YYYY-MM-DD>"                       "<YYYY-MM-DD>" 
+#>        biostat_effort_planned.source biostat_effort_planned.admin_contact 
+#>                              "grant"                            "Unknown"
 ```
 
-# Get specific project data
+## Get specific project data
 
 ``` r
 get_project_data("title")
@@ -48,21 +86,21 @@ get_project_data("title")
 #> "My D2SB Project"
 ```
 
-# Get sharepoint path
+## Get sharepoint path
 
 ``` r
 sp_path()
-#> [1] "~/Library/CloudStorage/OneDrive-SharedLibraries-UniversityofIowa/Data2Science BRIDGE - Documents/Projects/template_project/"
+#> [1] "~/Library/CloudStorage/OneDrive-SharedLibraries-UniversityofIowa/Data2Science BRIDGE - Documents//Projects/template_project/"
 ```
 
-# List files on sharepoint
+## List files on sharepoint
 
 ``` r
 list.files(sp_path())
 #> [1] "DataProcessed" "DataRaw"
 ```
 
-# Read data off sharepoint
+## Read data off sharepoint
 
 ``` r
 test_data <- read_csv(sp_path("DataRaw/test_data.csv")) 
@@ -95,4 +133,13 @@ test_data
 #> #   dmpills <chr>, insulin <chr>, weight <dbl>, bmi <dbl>, waist <dbl>,
 #> #   whr <dbl>, glucose <dbl>, ldl <dbl>, hdl <dbl>, tg <dbl>, sbp <dbl>,
 #> #   dbp <dbl>
+```
+
+## Create new report
+
+A D2SB template report is available via this package. A new report based
+on this template can be created via:
+
+``` r
+create_report(path = "Reports/new.qmd")
 ```

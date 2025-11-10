@@ -1,0 +1,34 @@
+# grants.yml — grants supporting or resulting from this project
+# One entry per grant/contract/seed fund relevant to this project.
+grants:
+  - id: "NIH-R01-2026"
+    grant_number: "1R01XXXXX"
+    title: "TBD"
+    mechanism: "R01"            # R03/R21/R01/U01/Contract/Seed/etc.
+    sponsor: "NLM/NIH"
+    role: "Co-Investigator" 
+    pi: ""
+    start: "YYYY-MM-DD"
+    end: "YYYY-MM-DD"
+    status: "planned"          # planned | submitted | awarded | active | closed
+    notes: ""
+    admin-contact: ""
+    biostat_effort:
+      faculty_fte: 0.20
+      analyst_fte: 0.50
+      
+  - id: "DOD-Grant-2025"
+    grant_number: "XXXXXXXXX"
+    title: "Existing Grant Title"
+    mechanism: "Contract"
+    sponsor: "Department of Defense"
+    role: "Co-Investigator"
+    pi: ""
+    start: "YYYY-MM-DD"
+    end: "YYYY-MM-DD"
+    notes: ""
+    status: "awarded"
+        admin-contact: ""
+    biostat_effort:
+      faculty_fte: 0.20
+      analyst_fte: 0.50

@@ -1,0 +1,100 @@
+---
+title: "Untitled Report"
+subtitle: "`r D2SBtools::get_project_data('title')`"
+author: 
+  - name: "Analysts: `r D2SBtools::get_project_data('analyst')`"
+  - name: "Investigator: `r D2SBtools::get_project_data('pi')`"
+date: today
+format:
+  html:
+    theme: cosmo    
+    toc: true
+    toc-depth: 2
+    toc-location: left
+    code-copy: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  message: false
+editor_options: 
+  chunk_output_type: console
+---
+
+# Introduction
+
+Briefly describe the context, research questions, and scope of this report.
+
+- Primary outcome(s):
+- Key predictors/exposures:
+- Population / cohort:
+
+::: callout-note
+## Implementation note (sample callout)
+
+- Use callouts like this to highlight important caveats, decisions, or next steps.
+- You can also use `callout-warning`, `callout-tip`, etc.
+:::
+
+## Methods
+
+## Results
+
+## Descriptive summaries
+
+::: {.panel-tabset}
+
+## Tables
+
+Describe key descriptive tables here.
+
+```{r}
+#| label: tbl-baseline
+#| echo: false
+
+gtsummary::tbl_summary(iris)
+```
+
+## Plots
+
+Include core plots here.
+
+```{r}
+#| label: fig-example
+#| echo: false
+#| fig-cap: "Example placeholder plot."
+
+plot(iris)
+
+```
+
+:::
+
+## Main model results
+
+# Discussion
+
+---
+
+# Appendix
+
+## Session information
+
+```{r}
+#| label: session-info
+#| echo: true
+
+sessioninfo::session_info()
+```
+
+<!-- footer -->
+
+---
+
+```{r, echo=FALSE, out.width='20%', fig.show='hold'}
+logo <- system.file("logo", "logo-small.png", package = "D2SBtools")
+knitr::include_graphics(logo)
+```
+

@@ -4,7 +4,10 @@
 \alias{sp_root}
 \title{get the local SP path}
 \usage{
-sp_root()
+sp_root(file_name = "")
+}
+\arguments{
+\item{file_name}{optionally returns full file name for a specific file}
 }
 \description{
 get the local SP path

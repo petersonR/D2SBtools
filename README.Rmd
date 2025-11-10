@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -11,6 +13,10 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+library(tidyverse)
+
+Sys.setenv("D2SB_SP_PATH" = "~/Library/CloudStorage/OneDrive-SharedLibraries-UniversityofIowa/Data2Science BRIDGE - Documents")
+
 ```
 
 # D2SBtools
@@ -35,52 +41,63 @@ library(D2SBtools)
 ```
 
 
-## Example
+# Example
 
-This is a basic example:
+This is a basic example.
 
-```{r, echo = FALSE, include = FALSE}
-library(tidyverse)
+## Create new D2SB project
+
+The following copies the [template project directory](https://github.com/petersonR/D2SBtools/tree/main/inst/templates/project/skeleton) and thereby creates a new project. 
+
+```{r}
 # write a local verson to be able to read
-dir.create("Admin")
-ghost_project <- list(
+create_project(
+  project_name = "temporary_project", 
+  path = NULL, # creates in current directory
+  open = FALSE, # Opens in RStudio
+  
+  # Set parameters in Admin/project.yml (can be done later too)
   title = "My D2SB Project",
   analyst = "Me",
   status = "active",
   pi = "My PI",
   data_path_from_sharepoint = "Projects/template_project"
 )
-yaml::write_yaml(ghost_project, file = "Admin/project.yml")
-Sys.setenv("D2SB_SP_PATH" = "~/Library/CloudStorage/OneDrive-SharedLibraries-UniversityofIowa/Data2Science BRIDGE - Documents")
 ```
 
-# Get all available project data
+```{r, include = FALSE}
+fs::dir_copy("temporary_project/Admin", ".")
+```
+
+
+## Get all available project data
+
+Moving into this temporary project, we can then run the following commands
 
 ```{r example}
 get_project_data()
 ```
 
-# Get specific project data 
+## Get specific project data 
 
 ```{r}
 get_project_data("title")
-
 ```
 
-# Get sharepoint path
+## Get sharepoint path
 
 ```{r}
 sp_path()
 
 ```
 
-# List files on sharepoint
+## List files on sharepoint
 
 ```{r}
 list.files(sp_path())
 ```
 
-# Read data off sharepoint
+## Read data off sharepoint
 
 ```{r}
 test_data <- read_csv(sp_path("DataRaw/test_data.csv")) 
@@ -88,6 +105,16 @@ test_data
 ```
 
 ```{r, echo = FALSE, include = FALSE}
+unlink("temporary_project", recursive = TRUE)
 unlink("Admin", recursive = TRUE)
+```
+
+
+## Create new report
+
+A D2SB template report is available via this package. A new report based on this template can be created via: 
+
+```{r, eval = FALSE}
+create_report(path = "Reports/new.qmd")
 ```
 
