@@ -27,5 +27,10 @@ create_report <- function(path = "Reports/new.qmd",
   template_txt <- readLines(template_file)
 
   writeLines(template_txt, path)
+  if (rstudioapi::isAvailable()) {
+    try(rstudioapi::navigateToFile(path), silent = TRUE)
+  }
+
+  message(glue::glue("✅ Created new template-based report at {path}"))
   invisible(path)
 }
