@@ -64,9 +64,6 @@ create_project <- function(project_name,
 
   yaml::write_yaml(current_info, file = paste0(path, "/Admin/project.yml"))
 
-  # Rename .Rproj file
-  file.rename(paste0(path, "/.Rproj"), paste0(path, "/", project_name, ".Rproj"))
-
   # Optionally open in RStudio
   if (open && rstudioapi::isAvailable()) {
     rstudioapi::openProject(path, newSession = TRUE)
