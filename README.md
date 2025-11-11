@@ -35,11 +35,10 @@ directory](https://github.com/petersonR/D2SBtools/tree/main/inst/templates/proje
 and thereby creates a new project.
 
 ``` r
-# write a local verson to be able to read
+# This will open a new R session
 create_project(
   project_name = "temporary_project", 
   path = NULL, # creates in current directory
-  open = FALSE, # Opens in RStudio
   
   # Set parameters in Admin/project.yml (can be done later too)
   title = "My D2SB Project",
@@ -48,7 +47,6 @@ create_project(
   pi = "My PI",
   data_path_from_sharepoint = "Projects/template_project"
 )
-#> ✅ Created project 'temporary_project' at /Users/rpterson/Library/CloudStorage/OneDrive-UniversityofIowa/Software/D2SBtools/temporary_project
 ```
 
 ## Get all available project data
@@ -59,13 +57,13 @@ commands
 ``` r
 get_project_data()
 #>                         project_name                         date_created 
-#>                  "temporary_project"                         "2025-11-10" 
+#>                  "temporary_project"                         "2025-11-11" 
 #>                                title                              analyst 
 #>                    "My D2SB Project"                                 "Me" 
 #>                               status                                   pi 
 #>                             "active"                              "My PI" 
 #>            data_path_from_sharepoint                                 dept 
-#>          "Projects/template_project"           "<Department or Division>" 
+#>          "Projects/template_project"             "Department or Division" 
 #>                           start_date                         expected_end 
 #>                       "<YYYY-MM-DD>"                       "<YYYY-MM-DD>" 
 #>                    current_data_date        biostat_effort_planned.person 

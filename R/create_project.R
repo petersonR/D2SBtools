@@ -4,13 +4,15 @@
 #' @param path Directory where the project should be created. If `NULL`,
 #'   the function will create a folder named `project_name` in the current working directory.
 #' @param open Logical; whether to open the new project in RStudio.
+#'  if set to FALSE, you will need to create a new .Rproj file in this new
+#'  directory.
 #' @param ... Named parameters to fill into `project.yml` template
 #'   (e.g., title, analyst, pi, status, etc.)
 #'
 #' @export
 create_project <- function(project_name,
                            path = NULL,
-                           open = interactive(),
+                           open = TRUE,
                            ...) {
 
   if (missing(project_name) || !nzchar(project_name)) {
@@ -71,7 +73,7 @@ create_project <- function(project_name,
     fs::file_delete(gitignore_template)
   }
 
-  # Optionally open in RStudio
+  # open in RStudio
   if (open && rstudioapi::isAvailable()) {
     rstudioapi::openProject(path, newSession = TRUE)
   }

@@ -49,7 +49,22 @@ This is a basic example.
 
 The following copies the [template project directory](https://github.com/petersonR/D2SBtools/tree/main/inst/templates/project/skeleton) and thereby creates a new project. 
 
-```{r}
+```{r, eval = FALSE}
+# This will open a new R session
+create_project(
+  project_name = "temporary_project", 
+  path = NULL, # creates in current directory
+  
+  # Set parameters in Admin/project.yml (can be done later too)
+  title = "My D2SB Project",
+  analyst = "Me",
+  status = "active",
+  pi = "My PI",
+  data_path_from_sharepoint = "Projects/template_project"
+)
+```
+
+```{r, include = FALSE}
 # write a local verson to be able to read
 create_project(
   project_name = "temporary_project", 
@@ -63,9 +78,6 @@ create_project(
   pi = "My PI",
   data_path_from_sharepoint = "Projects/template_project"
 )
-```
-
-```{r, include = FALSE}
 fs::dir_copy("temporary_project/Admin", ".")
 ```
 

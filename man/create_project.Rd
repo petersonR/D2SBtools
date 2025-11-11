@@ -4,7 +4,7 @@
 \alias{create_project}
 \title{Create a new D2SB project from the standard template}
 \usage{
-create_project(project_name, path = NULL, open = interactive(), ...)
+create_project(project_name, path = NULL, open = TRUE, ...)
 }
 \arguments{
 \item{project_name}{Name of the new project (used for folder name, project.yml, and .Rproj file).}
@@ -12,7 +12,9 @@ create_project(project_name, path = NULL, open = interactive(), ...)
 \item{path}{Directory where the project should be created. If `NULL`,
 the function will create a folder named `project_name` in the current working directory.}
 
-\item{open}{Logical; whether to open the new project in RStudio.}
+\item{open}{Logical; whether to open the new project in RStudio.
+if set to FALSE, you will need to create a new .Rproj file in this new
+directory.}
 
 \item{...}{Named parameters to fill into `project.yml` template
 (e.g., title, analyst, pi, status, etc.)}
