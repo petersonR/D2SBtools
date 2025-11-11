@@ -40,7 +40,7 @@ create_project <- function(project_name,
   fs::dir_create(path)
   template_contents <- list.files(
     skeleton_root,
-    all.files   = TRUE,   # include dotfiles like .Rproj.user, .here, etc.
+    all.files   = TRUE,   # include dotfiles like .Rproj, .gitignore, etc.
     full.names  = TRUE,
     no..        = TRUE    # skip '.' and '..'
   )
@@ -64,14 +64,10 @@ create_project <- function(project_name,
 
   yaml::write_yaml(current_info, file = paste0(path, "/Admin/project.yml"))
 
-  # 5. Rename .Rproj file if one exists
-  rproj_files <- fs::dir_ls(path, glob = "*.Rproj")
-  if (length(rproj_files) == 1) {
-    new_rproj <- fs::path(path, paste0(project_name, ".Rproj"))
-    fs::file_move(rproj_files, new_rproj)
-  }
+  # Rename .Rproj file
+  file.rename(paste0(path, "/.Rproj"), paste0(path, "/", project_name, ".Rproj"))
 
-  # 6. Optionally open in RStudio
+  # Optionally open in RStudio
   if (open && rstudioapi::isAvailable()) {
     rstudioapi::openProject(path, newSession = TRUE)
   }
