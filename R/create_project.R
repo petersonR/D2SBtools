@@ -64,6 +64,13 @@ create_project <- function(project_name,
 
   yaml::write_yaml(current_info, file = paste0(path, "/Admin/project.yml"))
 
+  gitignore_template <- fs::path(path, "gitignore.template")
+  if (fs::file_exists(gitignore_template)) {
+    new_gitignore <- fs::path(path, ".gitignore")
+    file.copy(gitignore_template, new_gitignore)
+    fs::file_delete(gitignore_template)
+  }
+
   # Optionally open in RStudio
   if (open && rstudioapi::isAvailable()) {
     rstudioapi::openProject(path, newSession = TRUE)
