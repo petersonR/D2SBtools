@@ -1,7 +1,7 @@
 Package: D2SBtools
 Type: Package
 Title: Tools for the Data 2 Science BRIDGE at Iowa
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
     person(
       "Ryan", "Peterson",

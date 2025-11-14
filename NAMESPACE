@@ -3,6 +3,7 @@
 export(create_project)
 export(create_report)
 export(get_project_data)
+export(move_to_dissemination)
 export(set_project_data)
 export(sp_path)
 export(sp_root)
