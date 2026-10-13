@@ -16,6 +16,13 @@ test_that("create_project copies the template and fills project.yml", {
   expect_equal(yml$title, "Demo")
   expect_equal(yml$analyst, "Me")
   expect_equal(yml$date_created, as.character(Sys.Date()))
+
+  # The products log ships empty, with the columns add_product() expects.
+  products <- file.path(path, "Admin", "products.csv")
+  expect_true(file.exists(products))
+  expect_equal(
+    names(utils::read.csv(products)), D2SBtools:::product_columns
+  )
 })
 
 test_that("create_project refuses a non-empty directory or a blank name", {

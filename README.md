@@ -176,3 +176,74 @@ db2duckdb(
   workers = 12
 )
 ```
+
+## Log a deliverable
+
+Each project keeps `Admin/products.csv`, a record of everything it has
+delivered or plans to deliver. Add to it with `add_product()`; analyst,
+PI, date, and id are filled in from `Admin/project.yml`:
+
+``` r
+add_product(
+  type = "figures",
+  title = "Manuscript figures 1-3 for journal submission",
+  source_file = "Code/make_figures.R",
+  related = "VHF-003"
+)
+```
+
+More examples, one per common deliverable. Put the specifics in `title`
+and `notes`, and links to grants or other products in `related`, so
+`type` stays countable across projects:
+
+``` r
+# Statement of work at the start of a project
+add_product("sow", "Statement of work and timeline",
+            source_file = "Admin/SOW.docx")
+
+# Standalone statistical analysis plan for a study, still being written.
+# `related` can tag the grant that funds the study.
+add_product("sap", "SAP for the primary outcome analysis",
+            status = "in_progress", actual_date = NA,
+            target_date = "2026-11-15", related = "grant=NIH-R01-2027")
+
+# Comprehensive analysis report sent to the PI
+add_product("report", "Comprehensive analysis report v1",
+            source_file = "Reports/report_comprehensive.qmd",
+            artifact_url = "Dissemination/2026-10-13-report_comprehensive.html",
+            notes = "Full results; supersedes the EDA report")
+
+# Revision of that report: a new row, linked to the original
+add_product("report", "Comprehensive analysis report v2",
+            related = "PROJ-003", notes = "Revised after PI feedback")
+
+# Conference abstract, submitted
+add_product("abstract", "IDWeek 2027 abstract", status = "submitted",
+            related = "PROJ-003")
+
+# Manuscript, accepted (dates are YYYY-MM-DD strings or Date objects)
+add_product("manuscript", "Readiness gaps in VHF preparedness",
+            status = "accepted", actual_date = "2027-02-01",
+            artifact_url = "https://doi.org/10.xxxx/xxxxx")
+
+# Grant application the project contributed to. An analysis plan or power
+# analysis written as a section of the application is part of this product,
+# not a separate `sap` row.
+add_product("grant", "R01 resubmission", status = "submitted",
+            notes = "Wrote the analysis plan and power analysis sections")
+
+# Analysis dataset handed off to the team
+add_product("dataset", "Analysis dataset v1 with data dictionary",
+            source_file = "Code/run_all.R")
+```
+
+When a product’s status changes, such as a submitted abstract that is
+later accepted, edit `status` (and `actual_date`) in its existing row
+rather than adding a new one. One row per product keeps group-wide
+counts honest, and git keeps the history. A revision that is delivered
+separately, like the v2 report above, is a new product and gets its own
+row.
+
+`product_vocabulary()` lists the types and statuses. A project that
+still has `Admin/products_minimal.xlsx` is converted to the CSV the
+first time `add_product()` runs.

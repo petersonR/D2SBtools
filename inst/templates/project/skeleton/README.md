@@ -11,7 +11,7 @@ Short description (1–2 sentences).
 Your main repo should look like this: 
 ```
 Admin/              # SOW, approvals
-  products.xlsx       # Deliverables log
+  products.csv        # Deliverables log; add rows with D2SBtools::add_product()
   project.yml         # Project metadata (status, dates, effort, funding)
   grants.yml          # (optional) Grants that support or result from this project
 Background/         # Papers, notes from PI
@@ -35,7 +35,7 @@ In this section, keep a reverse-chronological list of meeting note summaries (3-
 ## YYYY-MM-DD (most recent meeting)
 
 - Went over revised SOW, plan looked acceptable & regular meetings set up.
-- Discussed planned manuscript and abstracts; see new `products.xlsx` new entries with `planned` status
+- Discussed planned manuscript and abstracts; see new `products.csv` entries with `planned` status
 - PI will send additional information required by end of week
 
 ## ...

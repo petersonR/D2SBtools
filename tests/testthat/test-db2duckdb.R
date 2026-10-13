@@ -86,7 +86,6 @@ test_that("a rerun skips tables already converted", {
 })
 
 test_that("parallel workers give the same result", {
-  skip_on_os("windows")
   dir <- withr::local_tempdir()
   src <- make_sqlite(file.path(dir, "src.db"))
 

@@ -25,8 +25,8 @@ db2duckdb(
 free space of roughly three times the source size. On Argon, use local
 scratch, not your home directory or LSS.}
 
-\item{workers}{Number of tables converted at once. Uses forked processes,
-so values above 1 are not available on Windows.}
+\item{workers}{Number of tables converted at once, each in its own R
+process.}
 
 \item{threads, memory_limit}{DuckDB threads and memory limit per worker. The
 total is `workers` times these, which should fit the job's allocation

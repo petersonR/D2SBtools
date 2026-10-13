@@ -32,8 +32,8 @@
 #' @param scratch Directory for the working copy, parts, and merged file. Needs
 #'   free space of roughly three times the source size. On Argon, use local
 #'   scratch, not your home directory or LSS.
-#' @param workers Number of tables converted at once. Uses forked processes,
-#'   so values above 1 are not available on Windows.
+#' @param workers Number of tables converted at once, each in its own R
+#'   process.
 #' @param threads,memory_limit DuckDB threads and memory limit per worker. The
 #'   total is `workers` times these, which should fit the job's allocation
 #'   (e.g. 12 workers x 16GB within a 256G request).
@@ -72,9 +72,6 @@ db2duckdb <- function(src, dest, scratch = tempdir(), workers = 1,
     rlang::abort(glue::glue(
       "{dest} already exists; set `overwrite = TRUE` to replace it."
     ))
-  }
-  if (workers > 1 && .Platform$OS.type == "windows") {
-    rlang::abort("`workers > 1` needs forked processes, unavailable on Windows.")
   }
   # A copied .db without its write-ahead log silently loses the uncommitted
   # transactions, so refuse rather than convert a partial database.
@@ -118,42 +115,59 @@ db2duckdb <- function(src, dest, scratch = tempdir(), workers = 1,
   }
 
   # Install the extension once, here, rather than racing in every worker.
-  con <- DBI::dbConnect(duckdb::duckdb())
+  drv <- duckdb::duckdb()
+  con <- DBI::dbConnect(drv)
   DBI::dbExecute(con, "INSTALL sqlite")
-  DBI::dbDisconnect(con, shutdown = TRUE)
+  close_duckdb(con, drv)
 
-  convert <- function(t) {
-    db2duckdb_table(t, src_local, parts_dir, tmp_root, threads, memory_limit)
+  # Each table is converted in a fresh process. Errors come back as condition
+  # objects rather than stopping the run, so one bad table does not discard
+  # the others.
+  convert <- function(t, fn, src_local, parts_dir, tmp_root, threads,
+                      memory_limit) {
+    tryCatch(
+      fn(t, src_local, parts_dir, tmp_root, threads, memory_limit),
+      error = identity
+    )
   }
+  # Detach the worker function from the package namespace, so the workers run
+  # this code rather than whichever D2SBtools version they would load. It only
+  # calls base R and `pkg::` functions, so it needs nothing else.
+  fn <- db2duckdb_table
+  environment(fn) <- globalenv()
+
   message(format(Sys.time()), " converting ", length(tables), " tables")
+  args <- list(fn = fn, src_local = src_local, parts_dir = parts_dir,
+               tmp_root = tmp_root, threads = threads,
+               memory_limit = memory_limit)
   res <- if (workers > 1) {
-    parallel::mclapply(tables, convert, mc.cores = workers,
-                       mc.preschedule = FALSE)
+    # Socket workers are fresh R sessions. Forked workers (mclapply) inherit
+    # this process's state, and forking after DuckDB has started its threads
+    # can deadlock: a job that hangs silently instead of failing.
+    cl <- parallel::makePSOCKcluster(workers)
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    tryCatch(
+      do.call(parallel::parLapplyLB, c(list(cl, tables, convert), args)),
+      error = function(e) {
+        rlang::abort(c(
+          "A worker process died (out of memory?).",
+          i = "Finished tables are kept, so rerun to retry the rest.",
+          x = conditionMessage(e)
+        ))
+      }
+    )
   } else {
-    lapply(tables, function(t) tryCatch(convert(t), error = identity))
+    lapply(tables, function(t) do.call(convert, c(list(t), args)))
   }
 
-  # mclapply reports a failed worker as a try-error, and a killed one (e.g.
-  # out of memory) as NULL, rather than stopping. Merging past either would
-  # produce a database silently missing tables.
-  failed <- vapply(
-    res,
-    function(r) is.null(r) || inherits(r, c("try-error", "error")),
-    logical(1)
-  )
+  # Merging past a failed table would produce a database silently missing it.
+  failed <- vapply(res, inherits, logical(1), what = "error")
   if (any(failed)) {
     rlang::abort(c(
       "Some tables failed to convert; finished tables are kept, so rerun to retry.",
       stats::setNames(
-        paste0(tables[failed], ": ", vapply(res[failed], function(r) {
-          if (is.null(r)) {
-            "worker was killed (out of memory?)"
-          } else if (inherits(r, "try-error")) {
-            conditionMessage(attr(r, "condition"))
-          } else {
-            conditionMessage(r)
-          }
-        }, character(1))),
+        paste0(tables[failed], ": ",
+               vapply(res[failed], conditionMessage, character(1))),
         rep("x", sum(failed))
       )
     ))
@@ -164,7 +178,8 @@ db2duckdb <- function(src, dest, scratch = tempdir(), workers = 1,
   final_local <- file.path(scratch, paste0(db_name, ".duckdb"))
   unlink(c(final_local, paste0(final_local, ".wal")))
   message(format(Sys.time()), " merging parts")
-  con <- DBI::dbConnect(duckdb::duckdb(), final_local)
+  drv <- duckdb::duckdb(final_local)
+  con <- DBI::dbConnect(drv)
   DBI::dbExecute(con, "SET preserve_insertion_order = false")
   for (t in tables) {
     part <- file.path(parts_dir, paste0(t, ".duckdb"))
@@ -176,12 +191,12 @@ db2duckdb <- function(src, dest, scratch = tempdir(), workers = 1,
     DBI::dbExecute(con, "DETACH p")
     n <- DBI::dbGetQuery(con, paste0("SELECT count(*) AS n FROM ", qt))$n
     if (n != summary$rows[summary$table == t]) {
-      DBI::dbDisconnect(con, shutdown = TRUE)
+      close_duckdb(con, drv)
       rlang::abort(glue::glue("Row count changed while merging table {t}."))
     }
   }
   DBI::dbExecute(con, "CHECKPOINT")
-  DBI::dbDisconnect(con, shutdown = TRUE)
+  close_duckdb(con, drv)
 
   # 4. Copy into place ####
   message(format(Sys.time()), " copying to ", dest)
@@ -232,8 +247,15 @@ db2duckdb_table <- function(t, src_local, parts_dir, tmp_root, threads,
   # A temp directory per table, so parallel workers never share spill files.
   tmp_dir <- fs::dir_create(file.path(tmp_root, make.names(t)))
 
-  con <- DBI::dbConnect(duckdb::duckdb(), part)
-  on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
+  drv <- duckdb::duckdb(part)
+  con <- DBI::dbConnect(drv)
+  # A socket worker outlives the table, and DuckDB holds the file lock until
+  # the database is shut down, so close it explicitly or the merge cannot
+  # open this part.
+  on.exit({
+    DBI::dbDisconnect(con)
+    duckdb::duckdb_shutdown(drv)
+  }, add = TRUE)
   DBI::dbExecute(con, paste0("SET threads = ", as.integer(threads)))
   DBI::dbExecute(con, paste0("SET memory_limit = ",
                              DBI::dbQuoteString(con, memory_limit)))
@@ -279,4 +301,11 @@ db2duckdb_table <- function(t, src_local, parts_dir, tmp_root, threads,
   writeLines(c(format(n_duck, scientific = FALSE), all_varchar), done)
   message(format(Sys.time()), " done: ", t, " (", n_duck, " rows)")
   data.frame(table = t, rows = as.numeric(n_duck), all_varchar = all_varchar)
+}
+
+# Disconnect and shut the database down, releasing its file lock now rather
+# than whenever the driver is garbage-collected.
+close_duckdb <- function(con, drv) {
+  DBI::dbDisconnect(con)
+  duckdb::duckdb_shutdown(drv)
 }
