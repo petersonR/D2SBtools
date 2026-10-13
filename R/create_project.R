@@ -78,6 +78,6 @@ create_project <- function(project_name,
     rstudioapi::openProject(path, newSession = TRUE)
   }
 
-  message(glue::glue("✅ Created project '{project_name}' at {path}"))
+  message(glue::glue("\u2705 Created project '{project_name}' at {path}"))
   invisible(path)
 }

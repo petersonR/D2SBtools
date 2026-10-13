@@ -4,3 +4,4 @@
 ^LICENSE\.md$
 ^\.positai$
 ^\.claude$
+(^|/)\.DS_Store$

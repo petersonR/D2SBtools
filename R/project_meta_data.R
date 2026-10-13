@@ -12,7 +12,7 @@
 #'
 get_project_data <- function(param){
   if(!file.exists(here("Admin/project.yml"))) {
-    stop("Admin/project.yml not found at", here())
+    stop("Admin/project.yml not found at ", here())
   }
 
   current_info <- yaml::read_yaml(here("Admin/project.yml"))
@@ -39,7 +39,7 @@ get_project_data <- function(param){
 set_project_data <- function(param, value, overwrite = FALSE){
 
   if(!file.exists(here("Admin/project.yml"))) {
-    stop("Admin/project.yml not found at", here())
+    stop("Admin/project.yml not found at ", here())
   }
 
   stopifnot(length(value) == 1)
@@ -47,8 +47,8 @@ set_project_data <- function(param, value, overwrite = FALSE){
 
   current_info <- yaml::read_yaml(here("Admin/project.yml"))
 
-  if(param %in% names(current_info) & !overwrite)
-    stop(param, "already exists; to overwrite, set overwrite to TRUE")
+  if(param %in% names(current_info) && !overwrite)
+    stop(param, " already exists; to overwrite, set overwrite to TRUE")
 
   current_info[[param]] <- value
   yaml::write_yaml(current_info, file = here("Admin/project.yml"))
@@ -83,6 +83,6 @@ sp_path <- function(file_name = "") {
 sp_root <- function(file_name = "") {
   d2sb_sp_root <- Sys.getenv("D2SB_SP_PATH")
   if(d2sb_sp_root == "")
-    stop("set D2SB_SP_PATH=[local D2SB SP path] via usethis::edit_r_environ(score = 'user')")
+    stop("set D2SB_SP_PATH=[local D2SB SP path] via usethis::edit_r_environ(scope = 'user')")
   file.path(d2sb_sp_root, file_name)
 }

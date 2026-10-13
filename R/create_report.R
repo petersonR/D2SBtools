@@ -31,6 +31,6 @@ create_report <- function(path = "Reports/new.qmd",
     try(rstudioapi::navigateToFile(path), silent = TRUE)
   }
 
-  message(glue::glue("✅ Created new template-based report at {path}"))
+  message(glue::glue("\u2705 Created new template-based report at {path}"))
   invisible(path)
 }

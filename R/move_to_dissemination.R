@@ -11,7 +11,7 @@ move_to_dissemination <- function(path_from, subdir_to, overwrite = FALSE, ...) 
 
 
   if(!file.exists(path_from))
-    rlang::abort(paste0("no report found at", path))
+    rlang::abort(paste0("No report found at ", path_from))
 
   dir_path <- sp_path("Dissemination")
 
@@ -44,7 +44,7 @@ move_to_dissemination <- function(path_from, subdir_to, overwrite = FALSE, ...) 
   ok <- file.copy(path_from, path_to, overwrite = overwrite)
   if (!ok) {
     if(file.exists(path_to))
-      stop("File already exists at", path_to, "; set overwrite = TRUE?")
+      stop("File already exists at ", path_to, "; set overwrite = TRUE?")
     stop("Failed to copy report to: ", path_to)
   }
 

@@ -57,7 +57,7 @@ commands
 ``` r
 get_project_data()
 #>                         project_name                         date_created 
-#>                  "temporary_project"                         "2025-11-11" 
+#>                  "temporary_project"                         "2026-10-13" 
 #>                                title                              analyst 
 #>                    "My D2SB Project"                                 "Me" 
 #>                               status                                   pi 
@@ -140,4 +140,39 @@ on this template can be created via:
 
 ``` r
 create_report(path = "Reports/new.qmd")
+```
+
+## Sign a figure
+
+Every published D2SB figure carries the group’s signature: the logo in
+the bottom-right corner, at the same physical size and position on every
+figure. Pass the size the figure will be saved at, so the placement is
+right:
+
+``` r
+p <- ggplot2::ggplot(mtcars, ggplot2::aes(wt, mpg)) +
+  ggplot2::geom_point()
+
+ggplot2::ggsave(
+  "fig1.tif", add_signature(p, width = 7, height = 5),
+  width = 7, height = 5, dpi = 1200, compression = "lzw"
+)
+```
+
+In a Quarto chunk, use the chunk’s `fig-width` and `fig-height`.
+
+## Convert a SQLite database to DuckDB
+
+`db2duckdb()` copies every table into a DuckDB file, checking row counts
+table by table, and can be rerun to resume after a crash. On Argon,
+point `scratch` at local scratch and size `workers` to the job:
+
+``` r
+# qsub -cwd -q AML-HM -pe smp 48 -l mf=256G db2duckdb.sh
+db2duckdb(
+  src = "/Shared/Statepi_Premier/databases/premier_24.db",
+  dest = "/Shared/Statepi_Marketscan/databases/premier/premier_24.duckdb",
+  scratch = "/localscratch/Users/hawkid",
+  workers = 12
+)
 ```

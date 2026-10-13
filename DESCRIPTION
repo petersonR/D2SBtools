@@ -1,7 +1,7 @@
 Package: D2SBtools
 Type: Package
 Title: Tools for the Data 2 Science BRIDGE at Iowa
-Version: 0.3.1
+Version: 0.4.0
 Authors@R: c(
     person(
       "Ryan", "Peterson",
@@ -12,6 +12,24 @@ Authors@R: c(
 Description: This package is meant to help processes and procedures related to 
     working at the D2SB. 
 License: GPL (>= 3)
+Imports:
+    fs,
+    glue,
+    here,
+    parallel,
+    rlang,
+    rstudioapi,
+    yaml
+Suggests:
+    cowplot,
+    DBI,
+    duckdb,
+    ggplot2,
+    magick,
+    RSQLite,
+    testthat (>= 3.0.0),
+    withr
+Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.3
+Config/roxygen2/version: 8.0.0
