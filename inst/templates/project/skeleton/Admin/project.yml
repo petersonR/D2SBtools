@@ -1,5 +1,6 @@
 # project.yml — minimal metadata for reports, dashboards & admin
 title: "Project title"
+description: "One or two sentences for the project website."
 status: "active"                # active | paused | completed
 pi: "PI name"
 dept: "Department or Division"

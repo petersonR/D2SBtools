@@ -27,6 +27,12 @@ create_report <- function(path = "Reports/new.qmd",
   template_txt <- readLines(template_file)
 
   writeLines(template_txt, path)
+
+  # The D2SB theme the template refers to. A report folder keeps its own copy,
+  # so an edited theme there is left alone.
+  scss <- fs::path(fs::path_dir(path), "d2sb.scss")
+  if (!fs::file_exists(scss))
+    fs::file_copy(system.file("site", "d2sb-site.scss", package = "D2SBtools"), scss)
   if (rstudioapi::isAvailable()) {
     try(rstudioapi::navigateToFile(path), silent = TRUE)
   }

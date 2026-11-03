@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#FFFFFF"/>
+  <!-- Bridge deck (black) -->
+  <rect x="2" y="14" width="28" height="2" fill="#000000"/>
+  <!-- Pillar caps (gray) -->
+  <rect x="4" y="16" width="5" height="1.5" fill="#63666A"/>
+  <rect x="13" y="16" width="5" height="1.5" fill="#63666A"/>
+  <rect x="22" y="16" width="5" height="1.5" fill="#63666A"/>
+  <!-- Pillar gold backgrounds -->
+  <rect x="4.5" y="17.5" width="4" height="5" fill="#FFCD00"/>
+  <rect x="13.5" y="17.5" width="4" height="5" fill="#FFCD00"/>
+  <rect x="22.5" y="17.5" width="4" height="5" fill="#FFCD00"/>
+  <!-- Pillar bases (black) -->
+  <rect x="5" y="22.5" width="3" height="4" fill="#000000"/>
+  <rect x="14" y="22.5" width="3" height="4" fill="#000000"/>
+  <rect x="23" y="22.5" width="3" height="4" fill="#000000"/>
+  <!-- Base caps (gray) -->
+  <rect x="4" y="26.5" width="5" height="1.5" fill="#63666A"/>
+  <rect x="13" y="26.5" width="5" height="1.5" fill="#63666A"/>
+  <rect x="22" y="26.5" width="5" height="1.5" fill="#63666A"/>
+  <!-- D2S text -->
+  <text x="16" y="12" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#000000">D2S</text>
+</svg>

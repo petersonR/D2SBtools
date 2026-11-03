@@ -5,10 +5,11 @@ test_that("create_project copies the template and fills project.yml", {
   ))
 
   for (d in c("Admin", "Code", "DataRaw", "DataProcessed", "Reports",
-              "Dissemination", "Background", "GrantInfo")) {
+              "Site", "Background", "GrantInfo")) {
     expect_true(dir.exists(file.path(path, d)), info = d)
   }
   expect_true(file.exists(file.path(path, ".gitignore")))
+  expect_true(file.exists(file.path(path, "meeting_notes.md")))
   expect_false(file.exists(file.path(path, "gitignore.template")))
 
   yml <- yaml::read_yaml(file.path(path, "Admin", "project.yml"))
@@ -41,6 +42,9 @@ test_that("create_report writes the template and will not overwrite", {
   suppressMessages(create_report(path))
   expect_true(file.exists(path))
   expect_gt(length(readLines(path)), 0)
+  # The D2SB theme the template uses comes with it.
+  expect_true(file.exists(file.path(dir, "Reports", "d2sb.scss")))
+  expect_true(any(grepl("d2sb.scss", readLines(path), fixed = TRUE)))
   expect_error(create_report(path), "already exists")
 })
 

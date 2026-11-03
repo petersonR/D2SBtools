@@ -130,6 +130,28 @@ A D2SB template report is available via this package. A new report based on this
 create_report(path = "Reports/new.qmd")
 ```
 
+## Share documents on the project website
+
+Everything shared with a PI goes in the project's `Site/` folder and becomes
+the project website, which the PI and study team browse from a synced
+SharePoint folder. `add_to_site()` files a dated copy and logs it in
+`Admin/products.csv`; `build_project_site()` builds the site from
+`project.yml`, `Site/`, `products.csv` and `meeting_notes.md`; and
+`publish_site()` mirrors it to the project's `Site/` folder on SharePoint.
+
+```{r, eval = FALSE}
+add_to_site("Reports/eda.html", "report", title = "Exploratory analysis")
+
+site <- build_project_site()
+preview_site(site)  # opens it in your browser
+publish_site(site, dry_run = TRUE)               # see what would change
+publish_site(site)
+```
+
+Then share the SharePoint `Site/` folder with the PI and study team
+(view-only) and email them the setup guide: `site_guide()` copies it,
+formatted, to your clipboard.
+
 ## Sign a figure
 
 Every published D2SB figure carries the group's signature: the logo in the
