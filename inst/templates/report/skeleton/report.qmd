@@ -7,7 +7,7 @@ author:
 date: today
 format:
   html:
-    theme: cosmo    
+    theme: [cosmo, d2sb.scss]   # D2SB brand; create_report() puts d2sb.scss next to the report
     toc: true
     toc-depth: 2
     toc-location: left

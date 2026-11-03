@@ -1,7 +1,7 @@
 Package: D2SBtools
 Type: Package
 Title: Tools for the Data 2 Science BRIDGE at Iowa
-Version: 0.5.0
+Version: 0.6.0
 Authors@R: c(
     person(
       "Ryan", "Peterson",
@@ -21,6 +21,7 @@ Imports:
     rstudioapi,
     yaml
 Suggests:
+    commonmark,
     cowplot,
     DBI,
     duckdb,

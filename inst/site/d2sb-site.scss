@@ -1,0 +1,75 @@
+/*-- scss:defaults --*/
+// D2SB brand, shared with the D2SB website (d2sb-quarto/d2sb.scss): keep the two in step.
+// Brand rule: Iowa gold is never text on a light background, only fills, borders and accents.
+
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@500;600;700&family=Roboto:wght@300;400;500;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
+
+$gold:        #FFCD00;
+$black:       #000000;
+$ink:         #1A1A1A;
+$ink-2:       #63666A;   // Iowa Cool Gray 10
+$paper-soft:  #F7F6F2;
+$slate:       #00558C;   // Iowa digital blue (PMS 7462)
+
+$font-family-sans-serif: 'Roboto', system-ui, sans-serif;
+$headings-font-family:   'Antonio', 'Roboto Condensed', sans-serif;
+$headings-font-weight:   600;
+$body-color:             $ink;
+$primary:                $slate;
+$link-color:             $slate;
+$navbar-bg:              $black;
+$navbar-fg:              #FFFFFF;
+$navbar-hl:              $gold;
+$footer-bg:              $black;
+$footer-fg:              #DDDDDD;
+
+/*-- scss:rules --*/
+
+h1, h2, h3 { letter-spacing: 0.01em; }
+h1.title { font-size: 2.5rem; }
+h2 { border-bottom: none; margin-top: 2.25rem; }
+
+.navbar { border-bottom: 4px solid $gold; }
+.navbar-brand img { max-height: 40px; }
+.nav-footer { font-size: 0.85rem; }
+
+.eyebrow {
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  font-size: 0.78rem; font-weight: 700; color: $ink-2; margin-bottom: 0.2rem;
+}
+
+.btn-gold { background: $gold; color: $black !important; border: 2px solid $gold; font-weight: 700; }
+.btn-gold:hover { background: darken($gold, 8%); }
+.btn-outline-ink { border: 2px solid $ink; color: $ink !important; font-weight: 600; }
+.btn-outline-ink:hover { background: $ink; color: #FFF !important; }
+
+// project facts under the dashboard title
+.fact-grid {
+  display: grid; gap: 0.75rem 1.5rem; margin: 0.5rem 0 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  background: $paper-soft; padding: 1rem 1.25rem; border-radius: 6px;
+  .fact p { margin-bottom: 0; }
+}
+
+// cards for recently shared documents
+.card-grid {
+  display: grid; gap: 1.25rem; margin: 1rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+.d2sb-card {
+  background: #FFF; border-top: 4px solid $gold; border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 1rem 1.15rem;
+  h3 { font-size: 1.2rem; margin-top: 0.1rem; margin-bottom: 0.4rem; }
+  p { font-size: 0.92rem; color: $ink-2; margin-bottom: 0.5rem; }
+  p:last-child { margin-bottom: 0; }
+}
+
+// a shared document shown inside its page, so the site's navigation stays around it
+.doc-frame {
+  display: block; width: 100%; height: 80vh; margin: 1rem 0 2rem;
+  border: 1px solid #E0DFDB; border-radius: 4px; background: #FFF;
+}
+
+// reports (create_report() copies this file next to the report as d2sb.scss)
+#title-block-header { border-bottom: 4px solid $gold; padding-bottom: 0.75rem; margin-bottom: 1.5rem; }
