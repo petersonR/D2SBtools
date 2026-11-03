@@ -64,8 +64,12 @@ build_project_site <- function(root = here::here(),
   fs::dir_create(out_dir)
   file.create(file.path(out_dir, build_marker))
 
-  assets <- system.file("site", package = "D2SBtools")
-  fs::dir_copy(assets, file.path(out_dir, "assets"), overwrite = TRUE)
+  # The theme and logos only: guide.md in the same folder is for email, and
+  # Quarto would render it as a page.
+  assets <- system.file("site", c("d2sb-site.scss", "d2sb-logo-reversed.svg", "favicon.svg"),
+                        package = "D2SBtools")
+  fs::dir_create(file.path(out_dir, "assets"))
+  file.copy(assets, file.path(out_dir, "assets"), overwrite = TRUE)
 
   sections <- unique(docs$section)
   sections <- names(site_section_labels)[names(site_section_labels) %in% sections]

@@ -95,22 +95,25 @@ publish_site <- function(site_dir = "_site",
       bullets(data_files),
       i = "Remove them from the site, or set `allow_data_files = TRUE` if they are aggregate results cleared for this audience."))
 
-  # Compare what is in dest now with what we last published there.
+  # Compare what is in dest now with what we last published there. Office
+  # files are compared by content (see content_hash()), because SharePoint
+  # writes its own metadata into every Office file it stores.
   old <- setdiff(existing, site_marker)
-  old_hash <- md5(file.path(dest, old))
+  old_hash <- content_hash(file.path(dest, old))
   names(old_hash) <- old
   manifest <- read_site_manifest(dest)
   added <- setdiff(old, names(manifest))
   common <- intersect(old, names(manifest))
-  changed <- common[old_hash[common] != manifest[common]]
+  expected <- upgrade_manifest_hashes(manifest[common], common, site_dir)
+  changed <- common[old_hash[common] != expected]
   outside <- c(added, changed)
   if (length(outside) > 0 && !overwrite_outside_changes)
     rlang::abort(c(
       glue::glue("{length(outside)} file(s) in '{dest}' were added or changed since the last publish, so publishing could delete or overwrite someone's work:"),
-      bullets(c(paste(added, "(added)"), paste(changed, "(changed)"))),
+      bullets(c(if (length(added)) paste(added, "(added)"), if (length(changed)) paste(changed, "(changed)"))),
       i = "Copy anything worth keeping into the project (e.g. with add_to_site()), then rerun with `overwrite_outside_changes = TRUE`."))
 
-  src_hash <- md5(file.path(site_dir, src))
+  src_hash <- content_hash(file.path(site_dir, src))
   names(src_hash) <- src
   in_dest <- src %in% old
   action <- rep("new", length(src))
@@ -167,6 +170,47 @@ site_files <- function(dir) {
 }
 
 md5 <- function(paths) unname(as.character(tools::md5sum(paths)))
+
+office_ext <- c("docx", "docm", "xlsx", "xlsm", "pptx", "pptm")
+
+# Parts of an Office file that are bookkeeping, not content. SharePoint adds
+# customXml/ and docProps/custom.xml to every Office file it stores, and
+# updates [Content_Types].xml and the .rels files to list them.
+office_bookkeeping <- function(parts) {
+  grepl("^(customXml|docProps)/", parts) | parts == "[Content_Types].xml" | grepl("\\.rels$", parts)
+}
+
+# A file's fingerprint: its md5, or for an Office file the md5 of its content
+# parts only (prefixed "office:"), so SharePoint's metadata doesn't count as a
+# change while any edit to the document's text, comments or media does.
+content_hash <- function(paths) {
+  vapply(paths, function(p) {
+    if (!tolower(tools::file_ext(p)) %in% office_ext) return(md5(p))
+    tryCatch({
+      parts <- utils::unzip(p, list = TRUE)$Name
+      parts <- sort(parts[!office_bookkeeping(parts) & !endsWith(parts, "/")])
+      d <- tempfile()
+      on.exit(unlink(d, recursive = TRUE))
+      utils::unzip(p, files = parts, exdir = d)
+      f <- tempfile()
+      on.exit(unlink(f), add = TRUE)
+      writeLines(paste(parts, md5(file.path(d, parts))), f)
+      paste0("office:", md5(f))
+    }, error = function(e) md5(p))
+  }, "", USE.NAMES = FALSE)
+}
+
+# Manifests written before content_hash() recorded raw md5s. For an Office
+# file whose source hasn't changed since, the published content is the
+# source's content, so compare against that.
+upgrade_manifest_hashes <- function(expected, paths, site_dir) {
+  legacy <- tolower(tools::file_ext(paths)) %in% office_ext & !startsWith(expected, "office:")
+  for (i in which(legacy)) {
+    src <- file.path(site_dir, paths[i])
+    if (file.exists(src) && md5(src) == expected[i]) expected[i] <- content_hash(src)
+  }
+  expected
+}
 
 # Up to 10 values as rlang bullet points.
 bullets <- function(x) {

@@ -132,3 +132,60 @@ test_that("site_guide formats the guide for email, and publish_site points to it
                       message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
   expect_true(any(grepl("site_guide()", msgs, fixed = TRUE)))
 })
+
+# A minimal Office-style zip: content parts plus whatever else is given.
+make_docx <- function(path, text, extra = list()) {
+  d <- tempfile()
+  dir.create(file.path(d, "word"), recursive = TRUE)
+  writeLines(text, file.path(d, "word", "document.xml"))
+  writeLines("types", file.path(d, "[Content_Types].xml"))
+  for (f in names(extra)) {
+    dir.create(dirname(file.path(d, f)), recursive = TRUE, showWarnings = FALSE)
+    writeLines(extra[[f]], file.path(d, f))
+  }
+  withr::with_dir(d, utils::zip(normalizePath(dirname(path)) |> file.path(basename(path)),
+                                list.files(".", recursive = TRUE, all.files = TRUE), flags = "-q"))
+  path
+}
+
+test_that("SharePoint's metadata in Office files isn't an outside change, but an edit is", {
+  skip_if(!nzchar(Sys.which("zip")), "no zip program")
+  root <- withr::local_tempdir()
+  dest <- file.path(root, "out")
+  site <- make_site(root, list("index.html" = "home"))
+  make_docx(file.path(site, "ms.docx"), "<w:t>our text</w:t>")
+  suppressMessages(publish_site(site, dest))
+
+  # SharePoint stores it with its own parts added and the bookkeeping updated.
+  unlink(file.path(dest, "ms.docx"))
+  make_docx(file.path(dest, "ms.docx"), "<w:t>our text</w:t>",
+            list("customXml/item1.xml" = "sp", "docProps/custom.xml" = "sp",
+                 "word/_rels/document.xml.rels" = "rels"))
+  writeLines("types, now with SharePoint's", file.path(tempdir(), "unused"))
+  msgs <- character()
+  withCallingHandlers(publish_site(site, dest),
+                      message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
+  expect_true(any(grepl("0 updated, 0 removed, 2 unchanged", msgs)))
+
+  # A PI's edit to the text is still caught, and only it is listed.
+  unlink(file.path(dest, "ms.docx"))
+  make_docx(file.path(dest, "ms.docx"), "<w:t>the PI's text</w:t>")
+  err <- expect_error(publish_site(site, dest), "added or changed")
+  expect_match(conditionMessage(err), "ms.docx (changed)", fixed = TRUE)
+  expect_no_match(conditionMessage(err), "(added)", fixed = TRUE)
+})
+
+test_that("an older manifest with raw hashes doesn't flag SharePoint's Office metadata", {
+  skip_if(!nzchar(Sys.which("zip")), "no zip program")
+  root <- withr::local_tempdir()
+  dest <- file.path(root, "out")
+  site <- make_site(root, list("index.html" = "home"))
+  make_docx(file.path(site, "ms.docx"), "<w:t>our text</w:t>")
+  suppressMessages(publish_site(site, dest))
+  # Rewrite the manifest the way earlier versions did: raw md5s.
+  files <- c("index.html", "ms.docx")
+  D2SBtools:::write_site_manifest(dest, site, stats::setNames(D2SBtools:::md5(file.path(site, files)), files))
+  unlink(file.path(dest, "ms.docx"))
+  make_docx(file.path(dest, "ms.docx"), "<w:t>our text</w:t>", list("customXml/item1.xml" = "sp"))
+  expect_no_error(suppressMessages(publish_site(site, dest)))
+})

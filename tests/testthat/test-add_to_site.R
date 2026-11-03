@@ -90,6 +90,8 @@ test_that("build_project_site writes pages from Site/, products and meeting note
   expect_true(file.exists(file.path(out, "reports", "eda.qmd")))
   expect_true(file.exists(file.path(out, "abstracts", "index.qmd")))
   expect_true(file.exists(file.path(out, "meeting-notes.qmd")))
+  expect_setequal(list.files(file.path(out, "assets")),
+                  c("d2sb-site.scss", "d2sb-logo-reversed.svg", "favicon.svg"))
 
   index <- paste(readLines(file.path(out, "index.qmd")), collapse = "\n")
   expect_match(index, "Demo study")
