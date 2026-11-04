@@ -159,7 +159,7 @@ publish_site <- function(site_dir = "_site",
       "First publish here: in SharePoint, select '{site_guide_pdf}' and choose Pin to top, ",
       "so people opening the folder link see the instructions first."))
   message(glue::glue(
-    "To invite collaborators, share that folder with them (view-only) and email them its link: ",
+    "To invite collaborators, share that folder with them (view-only) and email them its link: \n",
     "D2SBtools::site_email(\"<folder link>\") copies a short invitation to your clipboard."))
   invisible(plan)
 }
@@ -325,7 +325,7 @@ email_text <- function(title, link = NULL) {
            "one-time setup that takes about 5 minutes. After that, new and updated reports ",
            "appear on your computer automatically."),
     "",
-    "Questions? Just reply to this email.")
+    "Please don't hesitate to reach out with any questions.")
 }
 
 # The guide as a standalone HTML document, styled for pasting into email.
