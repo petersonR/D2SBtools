@@ -5,3 +5,4 @@
 ^\.positai$
 ^\.claude$
 (^|/)\.DS_Store$
+^CLAUDE\.md$

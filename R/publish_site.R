@@ -76,6 +76,7 @@ publish_site <- function(site_dir = "_site",
       "The folder '{fs::path_dir(dest)}' doesn't exist. Is the SharePoint library synced on this machine, and is D2SB_SP_PATH right?"))
 
   existing <- site_files(dest)
+  first_publish <- !(site_marker %in% existing)
   if (length(existing) > 0 && !(site_marker %in% existing))
     rlang::abort(glue::glue(
       "'{dest}' already has files that publish_site() didn't put there, and publishing would delete them. ",
@@ -153,9 +154,13 @@ publish_site <- function(site_dir = "_site",
   write_site_manifest(dest, site_dir, src_hash)
 
   message(glue::glue("Published {site_dir} to {dest}: {summary}."))
+  if (first_publish && site_guide_pdf %in% src)
+    message(glue::glue(
+      "First publish here: in SharePoint, select '{site_guide_pdf}' and choose Pin to top, ",
+      "so people opening the folder link see the instructions first."))
   message(glue::glue(
-    "To invite collaborators, share that folder with them (view-only) and email them the setup guide: ",
-    "run D2SBtools::site_guide() to copy it, formatted, to your clipboard."))
+    "To invite collaborators, share that folder with them (view-only) and email them its link: ",
+    "D2SBtools::site_email(\"<folder link>\") copies a short invitation to your clipboard."))
   invisible(plan)
 }
 
@@ -250,40 +255,77 @@ remove_empty_dirs <- function(dest) {
 
 #' The collaborator setup guide for project websites
 #'
-#' Copies the guide for PIs and study teams (how to sync a project's `Site/`
-#' folder, open the website and get updates) to the clipboard as formatted
-#' text, ready to paste into an email with its headings, lists and table
-#' intact. [publish_site()] points to it after each publish. Edit the guide in
-#' the package, at `inst/site/guide.md`.
+#' The guide for PIs and study teams: how to sync a project's `Site/` folder,
+#' open the website and get updates. [build_project_site()] puts it in every
+#' site as `How to view these reports.pdf`. Edit it in the package, at
+#' `inst/site/guide.md`.
+#'
+#' @param print If `TRUE`, print the guide's Markdown in the console.
+#' @return The path to the guide (Markdown), invisibly.
+#' @seealso [site_email()] for the invitation that points people to it.
+#' @examples
+#' site_guide(print = FALSE)
+#' @export
+site_guide <- function(print = TRUE) {
+  path <- system.file("site", "guide.md", package = "D2SBtools")
+  if (!nzchar(path)) rlang::abort("The setup guide is missing from this D2SBtools installation; reinstall it.")
+  if (print) cat(readLines(path, encoding = "UTF-8", warn = FALSE), sep = "\n")
+  invisible(path)
+}
+
+#' A short email inviting collaborators to a project website
+#'
+#' Copies a few lines to the clipboard as formatted text, ready to paste into
+#' an email: the link to the project's `Site/` folder on SharePoint, and a
+#' pointer to the instructions in it (`How to view these reports.pdf`; see
+#' [site_guide()]). Share the folder with them (view-only) first.
 #'
 #' Formatted copying uses `textutil` and `pbcopy` on macOS, PowerShell's
 #' `Set-Clipboard -AsHtml` on Windows, and `xclip` on Linux. If that fails,
-#' the guide is printed instead.
+#' the text is printed instead.
 #'
-#' @param copy If `TRUE`, copy the formatted guide to the clipboard.
-#' @param print If `TRUE`, print the guide's Markdown in the console.
-#' @return The path to the guide (Markdown), invisibly.
+#' @param link The SharePoint link to the project's `Site/` folder (from
+#'   **Share** or **Copy link** in SharePoint). Left as a placeholder if
+#'   missing.
+#' @param title Project title; defaults to `Admin/project.yml` in `root`.
+#' @param root Project root.
+#' @param copy If `FALSE`, print the email's text instead of copying it.
+#' @return The email's text (Markdown), invisibly.
 #' @examples
 #' \dontrun{
-#' site_guide()               # copy, then paste into your email
-#' site_guide(copy = FALSE, print = TRUE)
+#' site_email("https://uiowa.sharepoint.com/:f:/s/...")
 #' }
 #' @export
-site_guide <- function(copy = TRUE, print = FALSE) {
-  path <- system.file("site", "guide.md", package = "D2SBtools")
-  if (!nzchar(path)) rlang::abort("The setup guide is missing from this D2SBtools installation; reinstall it.")
-  md <- readLines(path, encoding = "UTF-8", warn = FALSE)
+site_email <- function(link = NULL, title = NULL, root = here::here(), copy = TRUE) {
+  if (is.null(title))
+    title <- tryCatch(read_project_yml(root)$title, error = function(e) NULL) %||% "the project"
+  md <- email_text(title, link)
   if (copy) {
     ok <- tryCatch(copy_html(guide_html(md)), error = function(e) FALSE)
     if (isTRUE(ok)) {
-      message("Copied the setup guide to the clipboard as formatted text. Paste it into your email, under the folder link.")
+      message("Copied the invitation to the clipboard as formatted text. Paste it into your email.")
     } else {
-      rlang::warn("Couldn't copy the formatted guide to the clipboard here, so it's printed below instead.")
-      print <- TRUE
+      rlang::warn("Couldn't copy the formatted invitation to the clipboard here, so it's printed below instead.")
+      copy <- FALSE
     }
   }
-  if (print) cat(md, sep = "\n")
-  invisible(path)
+  if (!copy) cat(md, sep = "\n")
+  invisible(md)
+}
+
+email_text <- function(title, link = NULL) {
+  shown <- if (is.null(link) || !nzchar(link)) "[link to the project's Site folder]" else
+    paste0("[", link, "](", link, ")")
+  c(paste0("We've set up a website for **", title, "** with everything we've shared with you, ",
+           "kept up to date as we add more. It's in this SharePoint folder:"),
+    "",
+    shown,
+    "",
+    paste0("Open **", site_guide_pdf, "** in that folder first: it walks you through a ",
+           "one-time setup that takes about 5 minutes. After that, new and updated reports ",
+           "appear on your computer automatically."),
+    "",
+    "Questions? Just reply to this email.")
 }
 
 # The guide as a standalone HTML document, styled for pasting into email.

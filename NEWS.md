@@ -26,13 +26,18 @@ SharePoint folder instead of emailed HTML files.
   notes, papers and abstracts, upcoming deliverables), a page per document
   with its latest version shown inside the page (HTML and PDF) and earlier
   ones listed, and a page per section.
+* New `update_product()` edits a row of `Admin/products.csv` in place (a
+  note, a status change, a date), with the same checks as `add_product()`.
 * New `preview_site()` opens a built site in your browser from disk, as
   collaborators see it. (RStudio's Viewer serves pages over a local web
   server, where the site's menu links don't work.)
-* New `site_guide()` copies the collaborator setup guide (syncing the folder,
-  opening the site, getting updates, rules) to the clipboard as formatted
-  text, ready to paste into an email.
-  `publish_site()` points to it after each publish.
+* Every site carries the collaborator setup guide (syncing the folder,
+  opening the site, getting updates, rules) as `How to view these
+  reports.pdf`, for people who open the folder link on the web. `site_guide()`
+  shows its source; edit it in `inst/site/guide.md`.
+* New `site_email()` copies a short invitation to the clipboard as formatted
+  text: the folder link and a pointer to the PDF. `publish_site()` points to
+  it, and on a folder's first publish reminds you to pin the PDF to the top.
 * New `publish_site()` mirrors a rendered site into a SharePoint folder,
   copying only changed files and removing pages no longer in the site. It
   keeps a manifest of what it published and stops, listing the files, if

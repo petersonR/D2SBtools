@@ -118,12 +118,6 @@ add_product <- function(type, title, status = "completed",
     rlang::abort(glue::glue("Product id '{id}' is already in {path}."))
   }
 
-  as_date_string <- function(x) {
-    if (length(x) != 1 || is.na(x)) return(NA_character_)
-    d <- as.Date(x, optional = TRUE)
-    if (is.na(d)) rlang::abort(glue::glue("Not a date: {x}"))
-    format(d, "%Y-%m-%d")
-  }
   one <- function(x) {
     x <- unlist(x)
     if (length(x) != 1) {
@@ -155,6 +149,78 @@ add_product <- function(type, title, status = "completed",
   )
   message("Logged ", id, " in ", path)
   invisible(id)
+}
+
+#' Change a deliverable in the products file
+#'
+#' Edits one row of `Admin/products.csv` in place: a status change, a note, a
+#' date, a link. One deliverable is one row, so a change to a deliverable
+#' edits its row (git keeps the history); a separately delivered revision is a
+#' new row, added with [add_product()] or [add_to_site()].
+#'
+#' Values are checked as [add_product()] checks them: `type` and `status`
+#' against [product_vocabulary()] (unknown values warn), dates as dates. Pass
+#' `NA` to clear a column. The id itself can't be changed.
+#'
+#' @param id Product id, e.g. `"VHF-007"`.
+#' @param ... Columns to change, by name: `type`, `title`, `analyst`, `pi`,
+#'   `target_date`, `actual_date`, `status`, `artifact_url`, `related`,
+#'   `source_file`, `notes`.
+#' @param path Products file.
+#' @return The updated row, invisibly.
+#' @examples
+#' \dontrun{
+#' update_product("VHF-007", notes = "Revised discussion; new Table 2")
+#' update_product("VHF-009", status = "accepted", actual_date = "2027-02-14")
+#' }
+#' @export
+update_product <- function(id, ..., path = here::here("Admin", "products.csv")) {
+  changes <- list(...)
+  if (length(changes) == 0) rlang::abort("Nothing to change: name the columns, e.g. notes = \"...\".")
+  fields <- names(changes)
+  if (is.null(fields) || any(!nzchar(fields)))
+    rlang::abort("Name every change, e.g. update_product(\"VHF-007\", notes = \"...\").")
+  unknown <- setdiff(fields, product_columns)
+  if (length(unknown) > 0)
+    rlang::abort(c(
+      glue::glue("Not a products column: {paste(unknown, collapse = ', ')}."),
+      i = paste("Columns:", paste(setdiff(product_columns, "id"), collapse = ", "))))
+  if (!file.exists(path)) rlang::abort(glue::glue("No products file at {path}."))
+
+  products <- read_products(path)
+  row <- which(products$id == id)
+  if (length(row) == 0) rlang::abort(glue::glue("No product '{id}' in {path}."))
+  if (length(row) > 1) rlang::abort(glue::glue("Product id '{id}' appears more than once in {path}; fix the file first."))
+
+  vocab <- product_vocabulary()
+  for (f in fields) {
+    v <- unlist(changes[[f]])
+    if (length(v) != 1) rlang::abort(glue::glue("`{f}` must be a single value."))
+    v <- if (f %in% c("target_date", "actual_date")) as_date_string(v) else as.character(v)
+    if (f == "type" && !is.na(v) && !v %in% vocab$type)
+      rlang::warn(glue::glue("type '{v}' is not in product_vocabulary(); changed anyway."))
+    if (f == "status" && !is.na(v) && !v %in% vocab$status)
+      rlang::warn(glue::glue("status '{v}' is not in product_vocabulary(); changed anyway."))
+    products[[f]][row] <- v
+  }
+  if (identical(products$status[row], "completed") && is.na(products$actual_date[row]))
+    rlang::warn(glue::glue("{id} is completed but has no `actual_date`."))
+
+  # Rewrite the whole file in the format add_product() appends in.
+  utils::write.table(
+    products, path, sep = ",", na = "", row.names = FALSE,
+    qmethod = "double", fileEncoding = "UTF-8"
+  )
+  message(glue::glue("Updated {id}: {paste(fields, collapse = ', ')}."))
+  invisible(products[row, ])
+}
+
+# "2026-11-04", a Date, or NA -> "YYYY-MM-DD" or NA; anything else stops.
+as_date_string <- function(x) {
+  if (length(x) != 1 || is.na(x)) return(NA_character_)
+  d <- as.Date(x, optional = TRUE)
+  if (is.na(d)) rlang::abort(glue::glue("Not a date: {x}"))
+  format(d, "%Y-%m-%d")
 }
 
 # Read the products file, creating it with a header if it is missing. Every

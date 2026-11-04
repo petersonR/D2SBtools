@@ -4,31 +4,23 @@
 \alias{site_guide}
 \title{The collaborator setup guide for project websites}
 \usage{
-site_guide(copy = TRUE, print = FALSE)
+site_guide(print = TRUE)
 }
 \arguments{
-\item{copy}{If `TRUE`, copy the formatted guide to the clipboard.}
-
 \item{print}{If `TRUE`, print the guide's Markdown in the console.}
 }
 \value{
 The path to the guide (Markdown), invisibly.
 }
 \description{
-Copies the guide for PIs and study teams (how to sync a project's `Site/`
-folder, open the website and get updates) to the clipboard as formatted
-text, ready to paste into an email with its headings, lists and table
-intact. [publish_site()] points to it after each publish. Edit the guide in
-the package, at `inst/site/guide.md`.
-}
-\details{
-Formatted copying uses `textutil` and `pbcopy` on macOS, PowerShell's
-`Set-Clipboard -AsHtml` on Windows, and `xclip` on Linux. If that fails,
-the guide is printed instead.
+The guide for PIs and study teams: how to sync a project's `Site/` folder,
+open the website and get updates. [build_project_site()] puts it in every
+site as `How to view these reports.pdf`. Edit it in the package, at
+`inst/site/guide.md`.
 }
 \examples{
-\dontrun{
-site_guide()               # copy, then paste into your email
-site_guide(copy = FALSE, print = TRUE)
+site_guide(print = FALSE)
 }
+\seealso{
+[site_email()] for the invitation that points people to it.
 }

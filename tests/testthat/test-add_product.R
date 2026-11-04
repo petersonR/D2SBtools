@@ -125,3 +125,44 @@ test_that("an old products_minimal.xlsx is converted on first use", {
     )
   }
 })
+
+test_that("update_product edits one row in place and leaves the rest alone", {
+  path <- file.path(withr::local_tempdir(), "Admin", "products.csv")
+  log_product(path, type = "manuscript", title = "Draft", notes = NA)
+  log_product(path, type = "abstract", title = "Abstract", status = "planned",
+              actual_date = NA, target_date = "2027-04-01")
+  before <- read_back(path)
+
+  expect_message(row <- update_product("DEMO-001", notes = "Revised discussion", path = path),
+                 "Updated DEMO-001: notes")
+  expect_equal(row$notes, "Revised discussion")
+  after <- read_back(path)
+  expect_equal(after$notes, c("Revised discussion", NA))
+  expect_equal(after[, names(after) != "notes"], before[, names(before) != "notes"])
+
+  # Status changes edit the row too; dates are checked; NA clears.
+  suppressMessages(update_product("DEMO-002", status = "submitted",
+                                  actual_date = as.Date("2027-03-30"), path = path))
+  expect_equal(read_back(path)$status, c("completed", "submitted"))
+  expect_equal(read_back(path)$actual_date[2], "2027-03-30")
+  suppressMessages(update_product("DEMO-001", notes = NA, path = path))
+  expect_true(is.na(read_back(path)$notes[1]))
+
+  # The file still takes new rows.
+  log_product(path, type = "report", title = "Third")
+  expect_equal(nrow(read_back(path)), 3)
+})
+
+test_that("update_product refuses what it can't do sensibly", {
+  path <- file.path(withr::local_tempdir(), "Admin", "products.csv")
+  log_product(path, type = "report", title = "R")
+  expect_error(update_product("DEMO-009", notes = "x", path = path), "No product 'DEMO-009'")
+  expect_error(update_product("DEMO-001", note = "x", path = path), "Not a products column: note")
+  # `id =` binds to the product to edit, leaving the other id as an unnamed change.
+  expect_error(update_product("DEMO-001", id = "DEMO-002", path = path), "Name every change")
+  expect_error(update_product("DEMO-001", path = path), "Nothing to change")
+  expect_error(update_product("DEMO-001", actual_date = "soon", path = path), "Not a date")
+  expect_warning(suppressMessages(update_product("DEMO-001", status = "shipped", path = path)),
+                 "not in product_vocabulary")
+  expect_equal(read_back(path)$title, "R")
+})

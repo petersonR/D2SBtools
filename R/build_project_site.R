@@ -14,7 +14,10 @@
 #'   `## YYYY-MM-DD` headings. The dashboard shows the latest two.
 #'
 #' The site works opened from disk (no server), so it has no search box.
-#' Publish it with `publish_site(build_project_site())`.
+#' Next to `index.html` goes the setup guide as a PDF, `How to view these
+#' reports.pdf`, so people who open the folder link on the web see the
+#' instructions first (pin it to the top of the folder in SharePoint). Publish
+#' the site with `publish_site(build_project_site())`.
 #'
 #' @param root Project root.
 #' @param out_dir Folder to build in. It is replaced on each build, so it must
@@ -136,6 +139,17 @@ build_project_site <- function(root = here::here(),
       glue::glue("Quarto couldn't render the project site in '{out_dir}'. The end of its log:"),
       stats::setNames(utils::tail(log, 15), rep(" ", min(15, length(log))))))
 
+  # Search is off, so its index is clutter in the folder people browse.
+  unlink(file.path(site, "search.json"))
+
+  # The setup guide, for people opening the folder on the web.
+  pdf <- tryCatch(render_guide_pdf(quarto, title), error = function(e) {
+    rlang::warn(c("Couldn't render the setup guide as a PDF, so the site has no instructions file.",
+                  conditionMessage(e)))
+    NULL
+  })
+  if (!is.null(pdf)) file.copy(pdf, file.path(site, site_guide_pdf), overwrite = TRUE)
+
   # The shared files themselves, exactly as shared, next to their pages.
   for (i in seq_len(nrow(docs))) {
     to <- file.path(site, docs$section[i], docs$file[i])
@@ -145,6 +159,29 @@ build_project_site <- function(root = here::here(),
 
   message(glue::glue("Built the site for '{title}' with {length(unique(paste(docs$section, docs$stem)))} document(s): {site}"))
   invisible(as.character(fs::path_abs(site)))
+}
+
+# File name of the setup guide in a published site.
+site_guide_pdf <- "How to view these reports.pdf"
+
+# Render inst/site/guide.md to PDF with Quarto's Typst engine (no LaTeX), in
+# its own folder so it never becomes a page of the website.
+render_guide_pdf <- function(quarto, project_title) {
+  md <- readLines(site_guide(print = FALSE), encoding = "UTF-8", warn = FALSE)
+  h1 <- grep("^# ", md)[1]
+  title <- if (is.na(h1)) "How to view these reports" else sub("^# ", "", md[h1])
+  if (!is.na(h1)) md <- md[-h1]
+  fm <- list(title = title, subtitle = project_title,
+             format = list(typst = list(papersize = "us-letter",
+                                        margin = list(x = "1in", y = "1in"))))
+  d <- tempfile("guide")
+  dir.create(d)
+  qmd <- file.path(d, "guide.qmd")
+  writeLines(enc2utf8(c("---", sub("\n$", "", yaml::as.yaml(fm)), "---", "", md)), qmd, useBytes = TRUE)
+  log <- suppressWarnings(system2(quarto, c("render", shQuote(qmd), "--quiet"), stdout = TRUE, stderr = TRUE))
+  pdf <- file.path(d, "guide.pdf")
+  if (!file.exists(pdf)) stop(paste(utils::tail(log, 5), collapse = "\n"))
+  pdf
 }
 
 # One row per file in Site/, with its version date, stem and products details.
