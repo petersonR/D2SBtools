@@ -162,7 +162,7 @@ build_project_site <- function(root = here::here(),
 }
 
 # File name of the setup guide in a published site.
-site_guide_pdf <- "How to view these reports.pdf"
+site_guide_pdf <- "Dashboard Quickstart Guide.pdf"
 
 # Render inst/site/guide.md to PDF with Quarto's Typst engine (no LaTeX), in
 # its own folder so it never becomes a page of the website.
@@ -171,7 +171,7 @@ render_guide_pdf <- function(quarto, project_title) {
   h1 <- grep("^# ", md)[1]
   title <- if (is.na(h1)) "How to view these reports" else sub("^# ", "", md[h1])
   if (!is.na(h1)) md <- md[-h1]
-  fm <- list(title = title, subtitle = project_title,
+  fm <- list(title = title,
              format = list(typst = list(papersize = "us-letter",
                                         margin = list(x = "1in", y = "1in"))))
   d <- tempfile("guide")

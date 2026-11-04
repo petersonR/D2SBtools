@@ -1,6 +1,6 @@
-# Viewing a Data2Science Dashboard
+# Viewing a Data2Science BRIDGE Dashboard
 
-## What this is
+## What is included in this directory?
 
 The D2SB creates a small website that lives in a shared SharePoint folder. Set it up once on your computer (about 5 minutes), and every time we publish an update it appears on your machine automatically.
 
