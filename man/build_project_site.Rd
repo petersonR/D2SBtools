@@ -44,7 +44,10 @@ is written by hand; it is assembled from:
 }
 \details{
 The site works opened from disk (no server), so it has no search box.
-Publish it with `publish_site(build_project_site())`.
+Next to `index.html` goes the setup guide as a PDF, `How to view these
+reports.pdf`, so people who open the folder link on the web see the
+instructions first (pin it to the top of the folder in SharePoint). Publish
+the site with `publish_site(build_project_site())`.
 }
 \examples{
 \dontrun{

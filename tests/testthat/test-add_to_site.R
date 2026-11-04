@@ -127,6 +127,8 @@ test_that("build_project_site renders a site that publish_site accepts", {
   expect_true(file.exists(file.path(site, "index.html")))
   expect_true(file.exists(file.path(site, "reports", "eda.html")))
   expect_true(file.exists(file.path(site, "reports", "2026-10-14-eda.html")))
+  expect_true(file.exists(file.path(site, "How to view these reports.pdf")))
+  expect_false(file.exists(file.path(site, "search.json")))
   expect_message(publish_site(site, file.path(withr::local_tempdir(), "Site")), "new")
 })
 

@@ -114,23 +114,33 @@ test_that("a file deleted from dest is simply published again", {
   expect_true(file.exists(file.path(dest, "a.html")))
 })
 
-test_that("site_guide formats the guide for email, and publish_site points to it", {
-  out <- capture.output(path <- site_guide(copy = FALSE, print = TRUE))
+test_that("site_guide shows the guide, site_email writes the invitation, publish_site points to both", {
+  out <- capture.output(path <- site_guide())
   expect_true(file.exists(path))
   expect_true(any(grepl("One-time setup", out, fixed = TRUE)))
+
+  txt <- paste(D2SBtools:::email_text("VHF study", "https://example.com/f"), collapse = "\n")
+  expect_match(txt, "**VHF study**", fixed = TRUE)
+  expect_match(txt, "[https://example.com/f](https://example.com/f)", fixed = TRUE)
+  expect_match(txt, "How to view these reports.pdf", fixed = TRUE)
+  expect_match(paste(D2SBtools:::email_text("X"), collapse = ""), "[link to the project's Site folder]", fixed = TRUE)
 
   skip_if_not_installed("commonmark")
   html <- D2SBtools:::guide_html(readLines(path, encoding = "UTF-8"))
   expect_match(html, "<h2>One-time setup</h2>", fixed = TRUE)
-  expect_match(html, "<strong>Always Keep on This Device</strong>", fixed = TRUE)
   expect_match(html, "<table border=", fixed = TRUE)
 
   root <- withr::local_tempdir()
-  site <- make_site(root, list("index.html" = "home"))
+  site <- make_site(root, list("index.html" = "home", "How to view these reports.pdf" = "pdf"))
   msgs <- character()
-  withCallingHandlers(publish_site(site, file.path(root, "out")),
-                      message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
-  expect_true(any(grepl("site_guide()", msgs, fixed = TRUE)))
+  collect <- function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") }
+  withCallingHandlers(publish_site(site, file.path(root, "out")), message = collect)
+  expect_true(any(grepl("site_email(", msgs, fixed = TRUE)))
+  expect_true(any(grepl("Pin to top", msgs, fixed = TRUE)))
+  # The pin reminder is for the first publish only.
+  msgs <- character()
+  withCallingHandlers(publish_site(site, file.path(root, "out")), message = collect)
+  expect_false(any(grepl("Pin to top", msgs, fixed = TRUE)))
 })
 
 # A minimal Office-style zip: content parts plus whatever else is given.

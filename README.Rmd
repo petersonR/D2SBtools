@@ -149,8 +149,9 @@ publish_site(site)
 ```
 
 Then share the SharePoint `Site/` folder with the PI and study team
-(view-only) and email them the setup guide: `site_guide()` copies it,
-formatted, to your clipboard.
+(view-only), pin `How to view these reports.pdf` to the top of the folder,
+and email them the folder link: `site_email("<folder link>")` copies a short
+invitation to your clipboard.
 
 ## Sign a figure
 
