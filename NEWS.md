@@ -26,6 +26,8 @@ SharePoint folder instead of emailed HTML files.
   notes, papers and abstracts, upcoming deliverables), a page per document
   with its latest version shown inside the page (HTML and PDF) and earlier
   ones listed, and a page per section.
+* New `update_product()` edits a row of `Admin/products.csv` in place (a
+  note, a status change, a date), with the same checks as `add_product()`.
 * New `preview_site()` opens a built site in your browser from disk, as
   collaborators see it. (RStudio's Viewer serves pages over a local web
   server, where the site's menu links don't work.)
